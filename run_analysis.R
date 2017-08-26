@@ -86,19 +86,19 @@ subsetData <- allData %>%
     select(subject_id, activity_id, colIndex)
 
 ## STEP 3
-
 ## MAKE ACTIVITY NAMES READ NICER & APPLY TO DATASET
 
 #  Change underscore to space
 #  Change case from all caps to title-style
 #  Make activity a factor with level order same as original table
-#  Use join, then select to change 'activity_id' to 'activity'
-#  Arrange by subject & activity
 
 activities$activity <- sub("_", " ", activities$activity)
 activities$activity <- str_to_title(activities$activity)
 activities$activity <- factor(activities$activity,
                               levels = activities$activity)
+
+#  Use join to add activity names to data
+#  Use select to drop 'activity_id' & Arrange by subject & activity
 
 subsetData <- inner_join(subsetData, activities,
                                by = "activity_id")
@@ -110,33 +110,36 @@ subsetData <- select(subsetData, subject_id, activity, starts_with("X")) %>%
 ## Note: these steps are being being combined out of order due to changing
 ##    the data to long form (see readme for explanation).
 
-## (Step 5A) Melt data to long form calculating means
-##    for each combo of subject & activity
+#  Step 5A: Melt data to long form
+#  Step 5B: Find the means of each feature for each subject & activity
+
 subsetMelted <- as_tibble(melt(subsetData,
-                                   id.vars = c("subject_id", "activity"),
-                                   variable.name = "old_cols",
-                                   value.name = "average_value"))
+                               id.vars = c("subject_id", "activity"),
+                               variable.name = "feature_id",
+                               value.name = "average_value"))
 
-## (Step 4a) Add column to features containing old column names to join by
-features <- add_column(features, old_cols = colnames(allData[3:563]))
+tidySubsetMelted <- subsetMelted %>%
+    group_by(subject_id, activity, feature_id) %>%
+    summarize(average_value = mean(average_value))
 
-tidySubsetData <- subsetMelted %>%
-                    group_by(subject_id, activity, old_cols) %>%
-                    summarize(average_value = mean(average_value))
+#  Step 4A: Edit features to read better
+#  Step 4B: Edit 'feature_id' values & change to int for later join
+#  Step 4C: Join data with features on 'feature_id' &
+#     remove unneeded columns via 'select'
+#     - Note: join keeps ordering of group_by; merge does not!
 
-#  Change 'old_cols' to character type for table join
-#  - Not necessary but causes a warning otherwise
-tidySubsetData$old_cols <- as.character(tidySubsetData$old_cols)
+features$feature <- sub("t", "time", features$feature, fixed = TRUE)
+features$feature <- sub("f", "freq", features$feature, fixed = TRUE)
 
+tidySubsetMelted$feature_id <- as.integer(sub("[[:alpha:]]", "",
+                                              tidySubsetMelted$feature_id,
+                                              fixed = FALSE))
 
-## (Step 4b) Replace feature ids with feature names (created Step 2)
+tidySubsetMelted <- inner_join(tidySubsetMelted, features, by = "feature_id")
 
-#  Join tidydata with features on 'feature'; remove unneeded via 'select'
-#  - Note: join keeps ordering of group_by; merge does not!
-tidySubsetData <- inner_join(tidySubsetData, features,
-                          by = "old_cols")
+## Step 5C: Final cleanup by selecting the needed columns
 
-tidyWearableLongForm <- tidySubsetData %>%
+tidyWearableLongForm <- tidySubsetMelted %>%
                     select(subject_id, activity, feature, average_value)
 
 
