@@ -143,7 +143,7 @@ tidyWearableLongForm <- tidySubsetMelted %>%
 
 ## FINALLY, OUTPUT TIDY DATA TO A CSV-DELIMITED FILE
 
-write_csv(tidyWearableLongForm, "./tidyWearableLongForm.txt")
+write.table(tidyWearableLongForm, "./tidyWearableLongForm.txt", row.name=FALSE)
 
 ## TEST PRINT TO CONSOLE
-# head(read_csv("./tidyWearableLongForm.txt"))
+# head(read.table("./tidyWearableLongForm.txt", header = TRUE))
