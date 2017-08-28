@@ -141,7 +141,7 @@ tidyWearableLongForm <- tidySubsetMelted %>%
                                measurement=feature, average_value)
 
 
-## FINALLY, OUTPUT TIDY DATA TO A CSV-DELIMITED FILE
+## FINALLY, OUTPUT TIDY DATA TO A TEXT FILE
 
 write.table(tidyWearableLongForm, "./tidyWearableLongForm.txt", row.name=FALSE)
 
