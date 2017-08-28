@@ -32,29 +32,34 @@ Eight data files are imported and combined, subsetted and tidied using Hadley Wi
 
 Summary: The data contains each feature/measurement that had already been processed to get the mean and standard deviations applied to them, as well as other noise-redection algorithms (see [features\_info.md](features\_info.md)) These were then summarized by finding the mean of those values by subject, activity and feature/measurement.
 
-**Column Variables:**
+#### Column Variables:
 
-<dt>subject_id</dt>
-<dd>The ID of the subject participating in all six activities. 9 were in the test set and 21 were in the train set.
+**subject\_id**
 
-Class: integer
+    The ID of the subject participating in all six activities. 9 were in the 
+    test set and 21 were in the train set.
+    
+    Class: integer
+    
+    Values: 1-30
 
-Values: 1-30
-</dd>
+**activity**
 
-<dt>activity</dt>
-<dd>The names of each of six activities.
+    The names of each of six activities.
+    
+    Class: factor
+    
+    Values: Walking, Walking Upstairs, Walking Downstairs, Sitting, Standing, 
+    Laying
 
-Class: factor
+**measurement**
 
-Values: Walking, Walking Upstairs, Walking Downstairs, Sitting, Standing, Laying</dd>
-
-<dt>measurement</dt>
-<dd>The 66 features (for each subject and activity) which had been pre-processed with mean or standard deviation.
-
-Class: character
-
-Values:</dd>
+    The 66 features (for each subject and activity) which had been 
+    pre-processed with mean or standard deviation.
+    
+    Class: character
+    
+    Values:
 
     timeBodyAcc-mean()-X            timeBodyAcc-mean()-Y          
     timeBodyAcc-mean()-Z            timeBodyAcc-std()-X           
@@ -90,13 +95,13 @@ Values:</dd>
     freqBodyBodyGyroMag-mean()      freqBodyBodyGyroMag-std()     
     freqBodyBodyGyroJerkMag-mean()  freqBodyBodyGyroJerkMag-std()
 
-<dt>average_value</dt>
-
-<dd>The mean for the measurement in its row.
-
-Class: numeric
-
-Values: varies; min being -0.99767 and max being 0.97451</dd>
+**average\_value**
+    
+    The mean for the measurement in its row.
+        
+    Class: numeric
+        
+    Values: varies; min being -0.99767 and max being 0.97451
 
 ---
 ##### License:
