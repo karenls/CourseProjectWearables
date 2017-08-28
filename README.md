@@ -48,9 +48,9 @@ Join 'featuresSub' to data and remove unnecessary columns using dplyr's `select(
 
 **Export data**
 
-Create a csv file of the final tidy data frame, named '[tidyWearableLongForm.txt](tidyWearableLongForm.txt "The exported tidy data")'. This file can be downloaded into working directory and read into R using:
+Create a text file of the final tidy data frame, named '[tidyWearableLongForm.txt](tidyWearableLongForm.txt "The exported tidy data")'. This file can be downloaded into working directory and read into R using:
 
-    df <- read.csv("tidyWearableLongForm.txt")
+    df <- read.table("./tidyWearableLongForm.txt", header = TRUE)
     head(df)
 
 Here is the head of the data, for the curious:
