@@ -17,8 +17,9 @@
 
 
 ## LOAD LIBRARIES OFFERING FASTER & BETTER FUNCTIONS
-library(tidyverse)
+library(reshape2)
 library(stringr)
+library(tidyverse)
 
 ## READ IN FILES AS TBL_DFs (TIBBLEs)
 #  'X_test.txt' and 'X_train.txt' are fwf with variable white space
@@ -57,9 +58,7 @@ features <- read_delim("./data/features.txt",
 ## STEP 1
 ## COMBINE DATA
 
-#  'test' set
-#  'train' set
-#  'test' + train'
+#  test set, train set, test + train
 
 testData <- bind_cols(subjectTest, testAct, testSet)
 trainData <- bind_cols(subjectTrain, trainAct, trainSet)
@@ -68,22 +67,26 @@ allData <- bind_rows(testData, trainData)
 #  Delete 'test' & 'train' sub-tables to clean up environment
 
 rm(list = c("subjectTest", "testAct", "testSet",
-     "subjectTrain", "trainAct", "trainSet"))
+            "subjectTrain", "trainAct", "trainSet"))
 
 ## STEP 2
 ## FIND SUBSET OF FEATURES THAT ARE MEAN AND STD ONLY
 
 #  First get index of desired features
-#  Add 2 to each element to skip subject and activity columns for subsetting
+#  Edit desired features to read better based on colIndex
+#  For subsetting, add 2 to each element to skip subject and activity columns
 #  Create intermediate tibble with `mean` & `std` feature columns
 
-colIndex <- as.integer(grep("-mean\\(|-std\\(",
-                            features$feature,
-                            ignore.case=TRUE))
-colIndex <- (colIndex + 2L)
+colIndex <- grep("(-mean|-std)\\(", features$feature, ignore.case=TRUE)
 
+featuresSub <- features[colIndex,]
+featuresSub$feature <- sub("^(t)", "time", featuresSub$feature)
+featuresSub$feature <- sub("^(f)", "freq", featuresSub$feature)
+
+colIndex <- colIndex + 2L
 subsetData <- allData %>%
     select(subject_id, activity_id, colIndex)
+
 
 ## STEP 3
 ## MAKE ACTIVITY NAMES READ NICER & APPLY TO DATASET
@@ -98,20 +101,22 @@ activities$activity <- factor(activities$activity,
                               levels = activities$activity)
 
 #  Use join to add activity names to data
-#  Use select to drop 'activity_id' & Arrange by subject & activity
+#  Use select to drop 'activity_id' & arrange by subject & activity
 
-subsetData <- inner_join(subsetData, activities,
-                               by = "activity_id")
+subsetData <- inner_join(subsetData, activities, by = "activity_id")
 subsetData <- select(subsetData, subject_id, activity, starts_with("X")) %>%
-    arrange(subject_id, activity)
+              arrange(subject_id, activity)
 
 
 ## STEPS 4 AND 5
-## Note: these steps are being being combined out of order due to changing
-##    the data to long form (see readme for explanation).
+## Note: these steps are being being combined due to changing
+##    the data to long form (see 'AboutTidyData.md' for explanation).
 
-#  Step 5A: Melt data to long form
-#  Step 5B: Find the means of each feature for each subject & activity
+#  Melt data to long form
+#  Find the means of each feature for each subject & activity
+#  Edit 'feature_id' values & change to int for later join
+#  Join data with featuresSub on 'feature_id' & remove unneeded columns via 'select'
+#     - Note: join keeps ordering of group_by; merge does not!
 
 subsetMelted <- as_tibble(melt(subsetData,
                                id.vars = c("subject_id", "activity"),
@@ -122,30 +127,23 @@ tidySubsetMelted <- subsetMelted %>%
     group_by(subject_id, activity, feature_id) %>%
     summarize(average_value = mean(average_value))
 
-#  Step 4A: Edit features to read better
-#  Step 4B: Edit 'feature_id' values & change to int for later join
-#  Step 4C: Join data with features on 'feature_id' &
-#     remove unneeded columns via 'select'
-#     - Note: join keeps ordering of group_by; merge does not!
-
-features$feature <- sub("t", "time", features$feature, fixed = TRUE)
-features$feature <- sub("f", "freq", features$feature, fixed = TRUE)
 
 tidySubsetMelted$feature_id <- as.integer(sub("[[:alpha:]]", "",
                                               tidySubsetMelted$feature_id,
                                               fixed = FALSE))
 
-tidySubsetMelted <- inner_join(tidySubsetMelted, features, by = "feature_id")
+tidySubsetMelted <- inner_join(tidySubsetMelted, featuresSub, by = "feature_id")
 
-## Step 5C: Final cleanup by selecting the needed columns
+#  Final cleanup of desired columns
 
 tidyWearableLongForm <- tidySubsetMelted %>%
-                    select(subject_id, activity, feature, average_value)
+                        select(subject_id, activity,
+                               measurement=feature, average_value)
 
 
 ## FINALLY, OUTPUT TIDY DATA TO A CSV-DELIMITED FILE
 
-write_csv(tidyWearableLongForm, "./tidyWearableLongForm.csv")
+write_csv(tidyWearableLongForm, "./tidyWearableLongForm.txt")
 
 ## TEST PRINT TO CONSOLE
-# head(read_csv("./tidyWearableLongForm.csv"))
+# head(read_csv("./tidyWearableLongForm.txt"))
