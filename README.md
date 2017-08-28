@@ -34,7 +34,7 @@ Activity labels are made more readable by removing the underscore and changing t
 
 **Steps 4 and 5**
 
-Because I have chosen to make my data tidy using the long form (using reshape2's `melt()` function), these 2 steps are combined for best efficiency. For an explanation on tiday and my choice of long form please see [my note](AboutTidyData.md "About Long Form Tidy Data").
+Because I have chosen to make my data tidy using the long form (using reshape2's `melt()` function), these 2 steps are combined for best efficiency. For an explanation on tidy data and my choice of the long form please see [my note](AboutTidyData.md "About Long Form Tidy Data").
 
 The steps within this section proceed as follows:
 
@@ -48,7 +48,7 @@ Join 'featuresSub' to data and remove unnecessary columns using dplyr's `select(
 
 **Export data**
 
-Create a csv file of the final tidy data frame, named 'tidyWearableLongForm.txt'. This file can be downloaded into working directory and read into R using:
+Create a csv file of the final tidy data frame, named '[tidyWearableLongForm.txt](tidyWearableLongForm.txt "The exported tidy data")'. This file can be downloaded into working directory and read into R using:
 
     df <- read.csv("tidyWearableLongForm.txt")
     head(df)
